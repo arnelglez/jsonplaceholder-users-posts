@@ -3,11 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { DEMO_PASSWORD, DEMO_USERNAME } from '~/features/auth/domain/credentials'
 import { AlertBanner } from '~/core/ui/AlertBanner'
 import { notifyWelcome } from '~/core/ui/apiToast'
+import { safeAppRedirectPath } from '~/core/security/safeRedirect'
 import { useAuthStore } from '~/features/auth/data/store/auth.store'
 
 function getRedirectPath(state: unknown): string {
   const from = (state as { from?: { pathname?: string } } | null)?.from?.pathname
-  return from?.startsWith('/app') ? from : '/app'
+  return safeAppRedirectPath(from)
 }
 
 export function LoginPage() {
@@ -15,6 +16,8 @@ export function LoginPage() {
   const location = useLocation()
   const login = useAuthStore((s) => s.login)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isLockedOut = useAuthStore((s) => s.isLockedOut)
+  const lockoutRemainingMs = useAuthStore((s) => s.lockoutRemainingMs)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -28,10 +31,20 @@ export function LoginPage() {
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+    if (isLockedOut()) {
+      const seconds = Math.ceil(lockoutRemainingMs() / 1000)
+      setError(`Demasiados intentos fallidos. Espera ${seconds}s antes de reintentar.`)
+      return
+    }
     const ok = login(username, password)
     if (ok) {
       notifyWelcome()
       navigate(getRedirectPath(location.state), { replace: true })
+      return
+    }
+    if (useAuthStore.getState().isLockedOut()) {
+      const seconds = Math.ceil(useAuthStore.getState().lockoutRemainingMs() / 1000)
+      setError(`Demasiados intentos fallidos. Espera ${seconds}s antes de reintentar.`)
       return
     }
     setError('Usuario o contraseña incorrectos.')
@@ -71,6 +84,7 @@ export function LoginPage() {
                 type="text"
                 autoComplete="username"
                 required
+                maxLength={128}
                 className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -87,6 +101,7 @@ export function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                maxLength={128}
                 className="mt-1 w-full rounded-lg border border-line-strong bg-paper px-3 py-2 text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

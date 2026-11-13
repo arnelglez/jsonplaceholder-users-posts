@@ -11,4 +11,9 @@ describe('verifyDemoLogin', () => {
     expect(verifyDemoLogin('admin', 'wrong')).toBe(false)
     expect(verifyDemoLogin('user', 'admin')).toBe(false)
   })
+
+  it('rejects oversized login fields', () => {
+    expect(verifyDemoLogin('a'.repeat(129), 'admin')).toBe(false)
+    expect(verifyDemoLogin('admin', 'a'.repeat(129))).toBe(false)
+  })
 })

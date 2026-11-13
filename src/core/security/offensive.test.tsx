@@ -15,6 +15,8 @@ describe('ataques SSRF / path injection', () => {
     expect(() => assertSafeApiPath('/posts?userId=1&evil=2')).toThrow()
     expect(() => assertSafeApiPath('/posts?userId=1%0a')).toThrow()
     expect(() => assertSafeApiPath('/users/%2e%2e/admin')).toThrow()
+    expect(() => assertSafeApiPath('https://evil.test/users')).toThrow()
+    expect(() => assertSafeApiPath('/users/1/')).toThrow()
   })
 })
 

@@ -15,7 +15,8 @@ Aplicación de demostración en React y TypeScript que consume la API pública [
 cp .env.example .env   # opcional; por defecto apunta a JSONPlaceholder
 npm install
 npm run dev            # http://localhost:5173
-npm test               # Vitest + Testing Library (18 tests)
+npm test               # Vitest + Testing Library
+npm run qa             # lint + test + build + npm audit
 npm run build
 npm run preview
 ```
@@ -49,8 +50,9 @@ Prioricé **código, datos, validación, tests y estructura** frente a pulido vi
 ## Seguridad (frontend)
 
 - Allowlist de rutas API, validación de JSON, límites de entrada, `fetch` endurecido
+- Tras login, redirección acotada (`safeAppRedirectPath`); bloqueo tras 5 intentos fallidos (30 s)
 - Cabeceras en [`vercel.json`](vercel.json) para despliegue estático
-- Tests en `src/security/offensive.test.tsx`
+- QA: `npm run qa` · tests ofensivos en `src/core/security/offensive.test.tsx`
 
 ## Qué haría con más tiempo
 
