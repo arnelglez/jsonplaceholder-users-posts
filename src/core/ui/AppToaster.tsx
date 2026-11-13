@@ -4,7 +4,7 @@ import { Toaster } from 'sonner'
 export function AppToaster() {
   return (
     <Toaster
-      position="top-center"
+      position="top-right"
       richColors
       closeButton
       duration={4500}
