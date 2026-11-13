@@ -39,8 +39,11 @@ src/
 
 | Ruta | Vista |
 |------|--------|
-| `/` | Placeholder en desktop (lista en layout); en móvil, solo lista hasta elegir usuario |
-| `/users/:userId/posts` | Publicaciones y formulario de creación (`userId` en URL, no `location.state`) |
+| `/` | Landing pública |
+| `/login` | Login demo (`admin` / `admin`, solo cliente) |
+| `/app` | Panel: placeholder desktop / lista en móvil |
+| `/app/users/:userId/posts` | Publicaciones y formulario (`userId` en URL) |
+| `*` | 404 — página no encontrada |
 
 Configuración: `app/router.tsx` + `RouterProvider` en `main.tsx`.
 
