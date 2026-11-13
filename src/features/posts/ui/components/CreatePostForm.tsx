@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { AlertBanner } from '~/core/ui/AlertBanner'
 import { StatusMessage } from '~/core/ui/StatusMessage'
 import {
   createPostFormSchema,
@@ -51,6 +52,11 @@ export function CreatePostForm({
     >
       <h3 className="text-base font-semibold text-ink">Nueva publicación</h3>
       <input type="hidden" name="userId" value={userId} readOnly />
+
+      <AlertBanner
+        variant="info"
+        message="Título y texto son obligatorios. Si el envío falla, verás un mensaje de error debajo."
+      />
 
       {submitError ? <StatusMessage message={submitError} /> : null}
 
