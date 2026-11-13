@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import { AlertBanner } from '~/core/ui/AlertBanner'
+import { notifyPostCreated } from '~/core/ui/apiToast'
 import { LoadingSpinner } from '~/core/ui/LoadingSpinner'
 import { StatusMessage } from '~/core/ui/StatusMessage'
 import { UserAvatar } from '~/core/ui/UserAvatar'
 import { assertAllowedUserId } from '~/core/security/validation'
-import { fetchUserById } from '~/features/users/data/api/users.api'
 import { usePostsUiStore } from '~/features/posts/data/store/postsUi.store'
 import { useCreatePost } from '~/features/posts/data/hooks/useCreatePost'
 import { usePosts } from '~/features/posts/data/hooks/usePosts'
-import type { User } from '~/features/users/domain/types'
+import { useUserById } from '~/features/users/data/hooks/useUserById'
 import { CreatePostForm } from '~/features/posts/ui/components/CreatePostForm'
 import { PostList } from '~/features/posts/ui/components/PostList'
-import { toast } from 'sonner'
 
 function parseRouteUserId(raw: string | undefined): number | null {
   if (!raw) return null
@@ -33,10 +33,7 @@ export function UserPostsPage() {
   const highlightPostId = usePostsUiStore((s) => s.highlightPostId)
   const setHighlightPostId = usePostsUiStore((s) => s.setHighlightPostId)
 
-  const [user, setUser] = useState<User | null>(null)
-  const [userLoading, setUserLoading] = useState(true)
-  const [userError, setUserError] = useState<string | null>(null)
-  const [userRetry, setUserRetry] = useState(0)
+  const { user, loading: userLoading, error: userError, retry: retryUser } = useUserById(userId)
 
   const {
     posts,
@@ -49,37 +46,9 @@ export function UserPostsPage() {
 
   useEffect(() => {
     if (userId === null) {
-      navigate('/', { replace: true })
-      return
+      navigate('/app', { replace: true })
     }
-
-    let cancelled = false
-    setUserLoading(true)
-    setUserError(null)
-
-    fetchUserById(userId)
-      .then((data) => {
-        if (!cancelled) setUser(data)
-      })
-      .catch((err: Error) => {
-        if (!cancelled) {
-          setUserError(err.message)
-          setUser(null)
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setUserLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [userId, navigate, userRetry])
-
-  useEffect(() => {
-    if (!postsError) return
-    toast.error('Error al cargar publicaciones', { description: postsError })
-  }, [postsError])
+  }, [userId, navigate])
 
   useEffect(() => {
     if (highlightPostId === null) return
@@ -93,8 +62,13 @@ export function UserPostsPage() {
 
   return (
     <div className="space-y-6 rounded-lg border border-line bg-paper-raised p-4 shadow-sm sm:p-6">
+      <AlertBanner
+        variant="info"
+        title="Publicaciones"
+        message="GET /posts?userId=… y POST /posts simulado. Los errores de red se muestran aquí; solo el POST exitoso lanza un toast arriba a la derecha."
+      />
       <nav className="lg:hidden">
-        <Link to="/" className="text-sm font-medium text-accent hover:underline">
+        <Link to="/app" className="text-sm font-medium text-accent hover:underline">
           ← Volver a usuarios
         </Link>
       </nav>
@@ -102,7 +76,7 @@ export function UserPostsPage() {
       {userLoading ? (
         <LoadingSpinner label="Cargando usuario…" />
       ) : userError ? (
-        <StatusMessage message={userError} onRetry={() => setUserRetry((n) => n + 1)} />
+        <StatusMessage message={userError} onRetry={retryUser} />
       ) : user ? (
         <>
           <header className="flex items-center gap-3 border-b border-line pb-5">
@@ -135,14 +109,7 @@ export function UserPostsPage() {
               if (created) {
                 prependPost(created)
                 setHighlightPostId(created.id)
-                toast.success('Publicación creada', {
-                  description:
-                    'Aparece arriba en la lista. JSONPlaceholder no persiste el POST en el servidor.',
-                })
-              } else {
-                toast.error('No se pudo crear la publicación', {
-                  description: 'Revisa la conexión o inténtalo de nuevo.',
-                })
+                notifyPostCreated()
               }
             }}
           />
