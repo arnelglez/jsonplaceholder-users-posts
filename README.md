@@ -69,7 +69,7 @@ Asistencia de Cursor limitada al código del repositorio (sin pegar conversacion
 
 ## Tiempo de desarrollo
 
-Aproximadamente **6 horas** (implementación inicial, arquitectura, seguridad, router, Sonner, UI y documentación).
+Aproximadamente **1 h 30 min** de trabajo en una sola sesión (13 nov 2026, ~16:50–18:15, UTC−5): MVP con tests y README, más iteraciones posteriores (diseño, arquitectura feature-first, seguridad, React Router, Sonner) antes del push final.
 
 ## Licencia
 
