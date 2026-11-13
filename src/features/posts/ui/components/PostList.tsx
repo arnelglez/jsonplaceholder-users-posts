@@ -1,3 +1,4 @@
+import { AlertBanner } from '~/core/ui/AlertBanner'
 import { LoadingSpinner } from '~/core/ui/LoadingSpinner'
 import { StatusMessage } from '~/core/ui/StatusMessage'
 import type { Post } from '~/features/posts/domain/types'
@@ -21,9 +22,11 @@ export function PostList({ posts, loading, error, onRetry, highlightPostId }: Po
 
   if (posts.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-line px-4 py-10 text-center text-sm text-ink-muted">
-        Este usuario no tiene publicaciones en la API de prueba.
-      </p>
+      <AlertBanner
+        variant="info"
+        title="Lista vacía"
+        message="Este usuario no tiene publicaciones en la API de prueba. Puedes crear la primera con el formulario inferior."
+      />
     )
   }
 
