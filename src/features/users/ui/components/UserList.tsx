@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { AlertBanner } from '~/core/ui/AlertBanner'
 import { LoadingSpinner } from '~/core/ui/LoadingSpinner'
 import { StatusMessage } from '~/core/ui/StatusMessage'
 import { UserAvatar } from '~/core/ui/UserAvatar'
@@ -57,8 +58,12 @@ export function UserList({
       {!loading && !error ? (
         <ul className="space-y-1">
           {filtered.length === 0 ? (
-            <li className="rounded-lg border border-dashed border-line px-3 py-8 text-center text-sm text-ink-muted">
-              Ningún usuario coincide con la búsqueda.
+            <li>
+              <AlertBanner
+                variant="info"
+                title="Sin resultados"
+                message="Ningún usuario coincide con la búsqueda. Prueba con otro nombre o borra el texto del campo."
+              />
             </li>
           ) : (
             filtered.map((user) => {
