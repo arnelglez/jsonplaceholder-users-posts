@@ -22,22 +22,29 @@ npm run preview
 
 ## Funcionalidad
 
-1. **Usuarios** — `GET /users`, búsqueda local por nombre (case-insensitive), selección en panel lateral (layout master-detail).
-2. **Publicaciones** — Al elegir un usuario navegas a `/users/:userId/posts`; `GET /posts?userId={id}` con carga, error y reintento.
-3. **Nueva publicación** — Formulario con **título** y **texto** obligatorios (Zod + react-hook-form); `POST /posts` y el nuevo item **al inicio** de la lista (la API no persiste datos).
-4. **Feedback** — [Sonner](https://sonner.emilkowal.ski/) en éxito/error de creación y fallos de red; banners inline con reintento.
+1. **Inicio** — Landing en `/` y acceso en `/login` (demo: usuario y contraseña `admin`; sesión en el navegador, sin backend).
+2. **Usuarios** — `GET /users`, búsqueda local por nombre (case-insensitive), selección en panel lateral (layout master-detail).
+3. **Publicaciones** — Tras entrar al panel (`/app`), al elegir un usuario navegas a `/app/users/:userId/posts`; `GET /posts?userId={id}` con carga, error y reintento.
+4. **Nueva publicación** — Formulario con **título** y **texto** obligatorios (Zod + react-hook-form); `POST /posts` y el nuevo item **al inicio** de la lista (la API no persiste datos).
+5. **Feedback** — Banners para info y errores de red; [Sonner](https://sonner.emilkowal.ski/) arriba a la derecha al entrar, salir y crear un post con éxito.
 
 ## Decisiones técnicas
 
 - **Vite + React 19 + TypeScript**
 - **Tailwind CSS v4**
 - **Arquitectura feature-first** (`features/`, `core/`) — ver [ARCHITECTURE.md](ARCHITECTURE.md); alias `~/`
-- **React Router 7** — `/` y `/users/:userId/posts`; `userId` en URL (no `location.state`)
+- **React Router 7** — `/`, `/login`, `/app`, `/app/users/:userId/posts`; `userId` en URL (no `location.state`)
 - **Responsive** — desktop: lista izquierda / detalle derecha; móvil: lista arriba, detalle abajo
 - **`core/network/httpClient`** — `http()` + `VITE_API_URL`
 - **Zustand** — solo highlight visual del post recién creado
 - **Formulario** — react-hook-form + Zod
 - **Búsqueda en cliente** — la API no filtra por nombre
+
+## UI y UX
+
+La interfaz **no pretende ser referencia de diseño de producto**: es un layout sobrio y legible para una prueba técnica, con foco en flujo claro (buscar → elegir usuario → ver y crear posts), estados de carga/error visibles y layout responsivo master-detail.
+
+Prioricé **código, datos, validación, tests y estructura** frente a pulido visual (ilustración, microinteracciones extensas, sistema de diseño propio). Para el alcance y el tiempo de la prueba, considero que el nivel de UI/UX es **aceptable**; en un proyecto real dedicaría más tiempo a investigación con usuarios, jerarquía visual y accesibilidad auditada (véase “Qué haría con más tiempo”).
 
 ## Seguridad (frontend)
 
@@ -69,7 +76,7 @@ Asistencia de Cursor limitada al código del repositorio (sin pegar conversacion
 
 ## Tiempo de desarrollo
 
-Aproximadamente **1 h 30 min** de trabajo en una sola sesión (13 nov 2026, ~16:50–18:15, UTC−5): MVP con tests y README, más iteraciones posteriores (diseño, arquitectura feature-first, seguridad, React Router, Sonner) antes del push final.
+Aproximadamente **30 minutos** (13 nov 2026), incluyendo MVP con tests, README y ajustes de entrega (landing, login demo, mensajes y documentación).
 
 ## Licencia
 
