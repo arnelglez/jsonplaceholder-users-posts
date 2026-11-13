@@ -1,5 +1,7 @@
 # JSONPlaceholder — Usuarios y publicaciones
 
+Repositorio: **https://github.com/arnelglez/jsonplaceholder-users-posts**
+
 Aplicación de demostración en React y TypeScript que consume la API pública [JSONPlaceholder](https://jsonplaceholder.typicode.com): listado de usuarios con búsqueda, publicaciones por usuario y creación simulada de posts con validación de formulario.
 
 ## Requisitos
@@ -10,54 +12,64 @@ Aplicación de demostración en React y TypeScript que consume la API pública [
 ## Cómo ejecutarlo
 
 ```bash
+cp .env.example .env   # opcional; por defecto apunta a JSONPlaceholder
 npm install
-npm run dev      # interfaz en http://localhost:5173
-npm test         # tests con Vitest y Testing Library
-npm run build    # compilación de producción
-npm run preview  # vista previa del build
+npm run dev            # http://localhost:5173
+npm test               # Vitest + Testing Library (18 tests)
+npm run build
+npm run preview
 ```
 
 ## Funcionalidad
 
-1. **Usuarios** — Carga desde `GET /users`, búsqueda local por nombre (sin distinguir mayúsculas) y selección en un panel lateral.
-2. **Publicaciones** — Al elegir un usuario, `GET /posts?userId={id}` con indicadores de carga y error con opción de reintentar.
-3. **Nueva publicación** — Formulario con título y texto obligatorios; `POST /posts` devuelve el objeto creado y la UI lo muestra **al inicio** de la lista (la API no persiste datos; es comportamiento esperado de JSONPlaceholder).
+1. **Usuarios** — `GET /users`, búsqueda local por nombre (case-insensitive), selección en panel lateral (layout master-detail).
+2. **Publicaciones** — Al elegir un usuario navegas a `/users/:userId/posts`; `GET /posts?userId={id}` con carga, error y reintento.
+3. **Nueva publicación** — Formulario con **título** y **texto** obligatorios (Zod + react-hook-form); `POST /posts` y el nuevo item **al inicio** de la lista (la API no persiste datos).
+4. **Feedback** — [Sonner](https://sonner.emilkowal.ski/) en éxito/error de creación y fallos de red; banners inline con reintento.
 
 ## Decisiones técnicas
 
-- **Vite + React 19 + TypeScript** — Herramienta rápida y tipado estricto en modelos de dominio (`User`, `Post`).
-- **Tailwind CSS v4** (plugin de Vite) — Estilos sin librería de componentes, layout responsivo en dos columnas (apilado en móvil).
-- **Sin enrutador** — Estado `selectedUserId` en `App`; suficiente para el alcance de la prueba.
-- **Capa `src/api/client.ts`** — `fetch` centralizado, `ApiError` y mensajes de red legibles.
-- **Hooks** (`useUsers`, `usePosts`, `useCreatePost`) — Encapsulan carga, error y reintento; `prependPost` actualiza la lista tras un POST exitoso.
-- **Búsqueda en cliente** — La API no ofrece filtrado por nombre; se evita lógica innecesaria en el servidor de prueba.
+- **Vite + React 19 + TypeScript**
+- **Tailwind CSS v4**
+- **Arquitectura feature-first** (`features/`, `core/`) — ver [ARCHITECTURE.md](ARCHITECTURE.md); alias `~/`
+- **React Router 7** — `/` y `/users/:userId/posts`; `userId` en URL (no `location.state`)
+- **Responsive** — desktop: lista izquierda / detalle derecha; móvil: lista arriba, detalle abajo
+- **`core/network/httpClient`** — `http()` + `VITE_API_URL`
+- **Zustand** — solo highlight visual del post recién creado
+- **Formulario** — react-hook-form + Zod
+- **Búsqueda en cliente** — la API no filtra por nombre
+
+## Seguridad (frontend)
+
+- Allowlist de rutas API, validación de JSON, límites de entrada, `fetch` endurecido
+- Cabeceras en [`vercel.json`](vercel.json) para despliegue estático
+- Tests en `src/security/offensive.test.tsx`
 
 ## Qué haría con más tiempo
 
-- Cacheo y revalidación con TanStack Query o SWR.
-- MSW para pruebas e2e y desarrollo sin red.
-- Rutas por usuario (`/users/:id`) y enlaces compartibles.
-- CI (GitHub Actions) con `test` y `build`.
-- Auditoría de accesibilidad (focus trap, live regions) y modo oscuro coherente.
-- Paginación o virtualización si el volumen de posts creciera.
+- TanStack Query / SWR para cacheo
+- MSW y pruebas e2e (Playwright)
+- **GitHub Actions** (`test` + `build`)
+- Página dedicada solo para crear post (`arch-form-crud`)
+- Paginación o virtualización de posts
+- Auditoría a11y y tema oscuro
 
 ## Uso de herramientas de IA
 
-Durante el desarrollo se usó asistencia de IA (Cursor) de forma acotada al código del repositorio:
+Asistencia de Cursor limitada al código del repositorio (sin pegar conversaciones):
 
-| Área | Asistencia | Revisión manual del autor |
-|------|------------|---------------------------|
-| Scaffold del proyecto | Plantilla Vite, dependencias sugeridas | Elección de Vite, Tailwind v4 y Vitest; eliminación del boilerplate por defecto |
-| Estructura y hooks | Borrador de organización de carpetas | Definición final de `ApiError`, reintentos y `prependPost` |
-| Componentes UI | Clases Tailwind y layout | Textos en español, accesibilidad (`aria-*`, estados de error) y flujo master-detail |
-| Tests | Esqueleto de pruebas con Testing Library | Ajuste del test de validación con `fireEvent.submit` (botón deshabilitado si hay campos vacíos) |
-| README | Esquema de secciones | Redacción final de decisiones y límites de la API |
-
-No se incorporaron fragmentos sin revisar: la validación del formulario, el manejo de errores de red y los asserts de los tests se comprobaron ejecutando `npm test` y `npm run build` en local.
+| Área | Asistencia IA | Revisión del autor |
+|------|---------------|-------------------|
+| Scaffold | Vite, dependencias | Stack final, Vitest, Tailwind v4 |
+| Arquitectura | Borrador feature-first | Alineado a `arch-react` |
+| Seguridad / parsers | Allowlist, tests ofensivos | Ajustes tras `npm test` |
+| UI / layout | Tailwind, modal (luego descartado) | Tema sobrio + master-detail + Router |
+| Tests | Esqueleto RTL | asserts, `fireEvent.submit`, mocks `fetch` |
+| README | Estructura | Texto final y límites de la API |
 
 ## Tiempo de desarrollo
 
-Aproximadamente **3 horas** (scaffold, implementación, tests, README y publicación).
+Aproximadamente **6 horas** (implementación inicial, arquitectura, seguridad, router, Sonner, UI y documentación).
 
 ## Licencia
 
